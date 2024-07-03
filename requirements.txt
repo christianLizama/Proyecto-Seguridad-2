@@ -1,7 +1,6 @@
 altgraph==0.17.4
 cffi==1.16.0
 cryptography==42.0.8
-evdev==1.7.1
 packaging==24.1
 pycparser==2.22
 pyinstaller==6.8.0

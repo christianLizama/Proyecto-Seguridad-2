@@ -1,8 +1,12 @@
 """
     Código para descifrar mensajes usando Fernet.
 """
+import os
 
 from cryptography.fernet import Fernet
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Decryptor:
     """
@@ -22,7 +26,7 @@ class Decryptor:
 
         :return: Clave de cifrado en bytes
         """
-        return open('secret.key', 'rb').read()
+        return open(os.environ.get("passfile"), 'rb').read()
 
     def decrypt_message(self, encrypted_message: bytes) -> str:
         """
