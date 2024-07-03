@@ -1,7 +1,10 @@
 """
-    Código para descifrar mensajes usando Fernet.
+Código para descifrar mensajes usando Fernet.
 """
+
 import os
+import argparse
+import sys
 
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
@@ -26,7 +29,11 @@ class Decryptor:
 
         :return: Clave de cifrado en bytes
         """
-        return open(os.environ.get("passfile"), 'rb').read()
+        passfile = os.environ.get("passfile")
+        if not passfile:
+            print("Error: La variable de entorno 'passfile' no está definida.")
+            sys.exit(1)
+        return open(passfile, 'rb').read()
 
     def decrypt_message(self, encrypted_message: bytes) -> str:
         """
@@ -38,9 +45,29 @@ class Decryptor:
         decrypted_message = self.cipher_suite.decrypt(encrypted_message)
         return decrypted_message.decode()
 
+    def decrypt_file(self, file_path: str):
+        """
+        Descifra un archivo de texto cifrado.
+
+        :param file_path: Ruta del archivo cifrado
+        """
+        if not file_path.endswith('.txt'):
+            print("Error: El archivo proporcionado no es un archivo .txt")
+            return
+
+        try:
+            with open(file_path, 'rb') as file:
+                encrypted_message = file.read()
+            decrypted_message = self.decrypt_message(encrypted_message)
+            print("Decrypted message:", decrypted_message)
+        except Exception as e:
+            print(f"Error al leer o descifrar el archivo: {e}")
+
+
 if __name__ == "__main__":
-    ENCRYPTED_MESAGGE = b"gAAAAABmff1B5UKvmpVMGqui6F3Cbenq5V0SQuJhltMwFFN181rM3e9mA0r1XEH_ywXROG6IcISw650HvTD8O8K1qj8dvGhNr4iG2tb000BzLOFOZ9YMK_K_vutbce292hPxFmpcs3eLUXZr07eTKJMwlFEMjmVwXbRlEKMn7ZbwuQrzewl5AUuQWCZkpgRI2aLv4FvRnY27IpC0NscOq_q-YxVaWNf9wTx5cCHnWhl89yry3h3m58IWwKN6rhKlPFvHrtT-aOHbYUpoItVd3d1Vs3c8P10vuQ=="
+    parser = argparse.ArgumentParser(description="Descifrar un archivo de texto cifrado usando Fernet.")
+    parser.add_argument('file', type=str, help='Ruta del archivo .txt cifrado a descifrar.')
+    args = parser.parse_args()
+
     decryptor = Decryptor()
-    print("Encrypted message:", ENCRYPTED_MESAGGE)
-    decrypted_message_result = decryptor.decrypt_message(ENCRYPTED_MESAGGE)
-    print("Decrypted message:", decrypted_message_result)
+    decryptor.decrypt_file(args.file)
