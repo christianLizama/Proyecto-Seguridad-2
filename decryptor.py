@@ -29,9 +29,9 @@ class Decryptor:
 
         :return: Clave de cifrado en bytes
         """
-        passfile = os.environ.get("passfile")
+        passfile = os.environ.get("pf")
         if not passfile:
-            print("Error: La variable de entorno 'passfile' no está definida.")
+            print("Error: La variable de entorno 'pf' no está definida.")
             sys.exit(1)
         return open(passfile, 'rb').read()
 
