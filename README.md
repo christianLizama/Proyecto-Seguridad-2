@@ -22,9 +22,8 @@
 
 <pre>
   <code>
-    email=tu_correo@ejemplo.com
-    password=tu_contraseña
-    passfile=ruta/al/archivo/secret.key
+    pf=ruta/al/archivo/secret.key
+    sv="http://tu-ip-receptora/"
   </code>
 </pre>
 
