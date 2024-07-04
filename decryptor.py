@@ -1,7 +1,3 @@
-"""
-Código para descifrar mensajes usando Fernet.
-"""
-
 import os
 import argparse
 import sys
@@ -56,18 +52,34 @@ class Decryptor:
             return
 
         try:
-            with open(file_path, 'rb') as file:
-                encrypted_message = file.read()
-            decrypted_message = self.decrypt_message(encrypted_message)
-            print("Decrypted message:", decrypted_message)
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+                
+            for line in lines:
+                if line.startswith("Encrypted Log:"):
+                    encrypted_message = line.split("Encrypted Log:")[1].strip()
+                    decrypted_message = self.decrypt_message(encrypted_message.encode())
+                    print("Decrypted message:", decrypted_message)
+                    return
+
+            print("Error: No se encontró 'Encrypted Log:' en el archivo.")
+
         except Exception as e:
             print(f"Error al leer o descifrar el archivo: {e}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Descifrar un archivo de texto cifrado usando Fernet.")
-    parser.add_argument('file', type=str, help='Ruta del archivo .txt cifrado a descifrar.')
+    parser.add_argument('--file', type=str, help='Ruta del archivo .txt cifrado a descifrar.')
+    parser.add_argument('--message', type=str, help='Mensaje cifrado a descifrar.')
     args = parser.parse_args()
 
     decryptor = Decryptor()
-    decryptor.decrypt_file(args.file)
+
+    if args.file:
+        decryptor.decrypt_file(args.file)
+    elif args.message:
+        decrypted_message = decryptor.decrypt_message(args.message.encode())
+        print("Decrypted message:", decrypted_message)
+    else:
+        print("Error: Debe proporcionar un archivo o un mensaje cifrado.")

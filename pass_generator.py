@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Verificar si la variable de entorno 'passfile' está definida
-passfile = os.environ.get("passfile")
+passfile = os.environ.get("pf")
 if not passfile:
     print("Error: La variable de entorno 'passfile' no está definida.")
     sys.exit(1)
