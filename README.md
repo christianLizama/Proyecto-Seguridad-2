@@ -58,7 +58,7 @@
 
   <p>Ejemplo:</p>
 
-  <p>Esto configurará el keylogger para enviar los correos cada 60 segundos a la dirección de correo especificada.</p>
+  <p>Esto configurará el keylogger para enviar los logs cada 60 segundos a la dirección ip del receptor.</p>
 
   <h3>Decryptor</h3>
 
