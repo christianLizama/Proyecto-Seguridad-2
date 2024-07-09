@@ -54,11 +54,9 @@
 
   <p>Para ejecutar el keylogger, usa el siguiente comando:</p>
 
-  <pre><code>python app.py --interval &lt;intervalo_en_segundos&gt; --recipient &lt;correo_destinatario&gt;</code></pre>
+  <pre><code>python cliente.py </code></pre>
 
   <p>Ejemplo:</p>
-
-  <pre><code>python app.py --interval 60 --recipient destinatario@ejemplo.com</code></pre>
 
   <p>Esto configurará el keylogger para enviar los correos cada 60 segundos a la dirección de correo especificada.</p>
 
